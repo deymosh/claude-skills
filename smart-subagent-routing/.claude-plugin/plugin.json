@@ -1,0 +1,13 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "smart-subagent-routing",
+  "version": "0.1.0",
+  "description": "Before implementing anything non-trivial, checks whether an available subagent model can execute it instead, delegates and reviews the result if so, and falls back to doing the work directly if none is available or it errors out.",
+  "author": {
+    "name": "deymosh",
+    "email": "deymoshdev@gmail.com"
+  },
+  "skills": [
+    "./"
+  ]
+}

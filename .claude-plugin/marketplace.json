@@ -1,0 +1,15 @@
+{
+  "name": "claude-skills",
+  "owner": {
+    "name": "deymosh",
+    "email": "deymoshdev@gmail.com"
+  },
+  "description": "Personal collection of Claude Code skills",
+  "plugins": [
+    {
+      "name": "smart-subagent-routing",
+      "source": "./smart-subagent-routing",
+      "description": "Before implementing anything non-trivial, delegates execution to the best-fit available subagent model and reviews the result, falling back to doing it directly if none fits or it fails"
+    }
+  ]
+}

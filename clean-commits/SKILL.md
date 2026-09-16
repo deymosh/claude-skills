@@ -39,9 +39,11 @@ Many git hosts auto-link a literal `@word` in a commit message as a user mention
 - Scan every line, including the body, for a bare `@` followed by letters/digits — not just names that look like handles. This also catches things that aren't meant as mentions, such as scoped package names (`@scope/package`) or email-shaped strings.
 - If found, rewrite to avoid it: wrap it in backticks, drop the leading `@`, or rephrase the sentence so the token isn't needed verbatim.
 
-## 5. Apply any required trailer, every time, unprompted
+## 5. Apply the required attribution trailer, every time, unprompted
 
-If the project or environment specifies a required commit trailer (for example, a co-authorship or attribution line), include it on every commit that lands there — exactly in the format specified, not paraphrased — without waiting to be asked each time. Don't drop it because the change felt small, and don't invent your own variant of the format if one is already given to you.
+This is a standing requirement, not something conditional on being told: if you are an AI assistant creating this commit, end the message with a co-authorship trailer identifying yourself — using whatever exact name and format your current environment's own instructions specify (e.g. `Co-Authored-By: <your current model name> <a contact address>`). Read your own identity fresh each time rather than reusing a name from a past session — the underlying model can change between sessions.
+
+Apply it on every commit that lands in the tree, unprompted, without waiting to be asked. Don't drop it because the change felt small. If the project separately specifies its own additional trailer or attribution format on top of this, apply that one too, in whatever combination the project's own instructions dictate.
 
 ## Notes
 

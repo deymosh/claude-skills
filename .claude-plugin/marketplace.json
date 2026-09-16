@@ -10,6 +10,11 @@
       "name": "smart-subagent-routing",
       "source": "./smart-subagent-routing",
       "description": "Before implementing anything non-trivial, delegates execution to the best-fit available subagent model and reviews the result, falling back to doing it directly if none fits or it fails"
+    },
+    {
+      "name": "clean-commits",
+      "source": "./clean-commits",
+      "description": "Commit hygiene: atomic commits, pre-commit verification, self-contained messages, auto-link scanning, and required attribution trailers"
     }
   ]
 }

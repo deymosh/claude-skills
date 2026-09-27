@@ -1,6 +1,6 @@
 ---
 name: clean-commits
-description: Use this skill whenever you are about to run `git commit` (or the user asks you to commit changes). Governs commit hygiene — splitting unrelated changes into separate atomic commits, verifying the change actually works before committing, writing messages that stand on their own without bare references or auto-link hazards, and applying any required attribution trailer. Triggers on: "commit this", "make a commit", "git commit", "clean up these commits", "split this into commits".
+description: Use this skill whenever you are about to run `git commit` (or the user asks you to commit changes). Governs commit hygiene — splitting unrelated changes into separate atomic commits, verifying the change actually works before committing, writing messages that stand on their own without bare references or auto-link hazards. Triggers on: "commit this", "make a commit", "git commit", "clean up these commits", "split this into commits".
 ---
 
 # Clean Commits

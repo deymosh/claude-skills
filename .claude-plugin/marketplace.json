@@ -14,7 +14,7 @@
     {
       "name": "clean-commits",
       "source": "./clean-commits",
-      "description": "Commit hygiene: atomic commits, pre-commit verification, self-contained messages, auto-link scanning, and required attribution trailers"
+      "description": "Commit hygiene: atomic commits, pre-commit verification, self-contained messages, and auto-link scanning"
     }
   ]
 }

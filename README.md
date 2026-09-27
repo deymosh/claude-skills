@@ -17,7 +17,7 @@ Add this repo as a marketplace, then install whichever skill you want:
 | Plugin | What it does |
 |---|---|
 | [`smart-subagent-routing`](smart-subagent-routing/SKILL.md) | Before implementing anything non-trivial, checks whether an available subagent model can execute it instead, delegates and reviews the result, and falls back to doing it directly if none fits or it fails. |
-| [`clean-commits`](clean-commits/SKILL.md) | Commit hygiene: atomic commits, pre-commit verification, self-contained messages, scanning for auto-link (`@word`) hazards, and applying the required attribution trailer. |
+| [`clean-commits`](clean-commits/SKILL.md) | Commit hygiene: atomic commits, pre-commit verification, self-contained messages, and scanning for auto-link (`@word`) hazards. |
 
 ## Adding a new skill
 

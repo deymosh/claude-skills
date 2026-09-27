@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "clean-commits",
   "version": "0.1.0",
-  "description": "Commit hygiene: splits unrelated changes into atomic commits, verifies before committing, writes self-contained messages, scans for auto-link hazards, and applies any required attribution trailer.",
+  "description": "Commit hygiene: splits unrelated changes into atomic commits, verifies before committing, writes self-contained messages, and scans for auto-link hazards.",
   "author": {
     "name": "deymosh",
     "email": "deymoshdev@gmail.com"

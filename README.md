@@ -24,7 +24,7 @@ Add this repo as a marketplace, then install whichever skill you want:
 Switch modes at any time with the slash command (requires `python3`):
 
 ```
-/routing solo   # never delegate — e.g. when evaluating a model on its own
+/routing solo   # subagents only on the session's own model — e.g. when evaluating a model
 /routing ask    # every subagent call needs your approval
 /routing auto   # delegate when it fits (default)
 /routing off    # disable the routing rules
@@ -32,6 +32,8 @@ Switch modes at any time with the slash command (requires `python3`):
 ```
 
 The mode applies to the current session only, survives resume and compaction, and is enforced by the hook, not just by instructions. To choose a default for new sessions, set the `SUBAGENT_ROUTING` env var (e.g. `SUBAGENT_ROUTING=solo claude`). `/clear` starts a new session, so it falls back to that default.
+
+In `solo`, the hook reads the session's current model from its transcript (so it follows `/model` switches) and allows a subagent only if its routing tag points to that exact provider and model; CCR client IDs are decoded for the comparison. The session's model must therefore be in the gateway's subagent list for solo sessions to delegate at all. Without a gateway, solo allows only subagents that inherit the session model; built-in agent types that pin their own model are not detected.
 
 Whenever `ANTHROPIC_BASE_URL` points at a gateway, the PreToolUse hook denies any Agent call whose prompt does not start with the routing tag (default `<CCR-SUBAGENT-MODEL>`, override with `SUBAGENT_ROUTING_TAG`). Untagged subagents inherit the parent or agent-type model, which is how work silently lands on a Claude subscription.
 

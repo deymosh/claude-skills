@@ -11,7 +11,7 @@ Goal: spend the session model's quota on thinking and reviewing; push well-speci
 
 The plugin's hook states it in context (`subagent-routing mode: …`); the most recent statement wins, and the user can change it any time with `/routing <mode>`. Plain requests in chat also count ("do it yourself", "I'm testing this model" → solo; "ask before offloading" → ask), but only `/routing` is enforced, so suggest it if they want the rule to hold.
 
-- **solo** — never call Agent. Do all the work yourself. The user is evaluating the current model; a delegated result would make that evaluation meaningless.
+- **solo** — the user is evaluating the current model, so every result must come from it. Subagents are allowed only when routed to this session's own model (same provider and model in the Agent tool's list); if it isn't listed, do all the work yourself.
 - **ask** — before each delegation, say in one line what you'd offload and to which model, and wait for a yes.
 - **auto** (default) — delegate whenever §3 says it fits.
 

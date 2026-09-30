@@ -16,8 +16,26 @@ Add this repo as a marketplace, then install whichever skill you want:
 
 | Plugin | What it does |
 |---|---|
-| [`smart-subagent-routing`](smart-subagent-routing/SKILL.md) | Before implementing anything non-trivial, checks whether an available subagent model can execute it instead, delegates and reviews the result, and falls back to doing it directly if none fits or it fails. |
+| [`smart-subagent-routing`](smart-subagent-routing/SKILL.md) | Routes non-trivial execution to cheaper subagent models and reviews the result. Ships hooks that block untagged (quota-leaking) subagents behind a gateway and add `auto` / `ask` / `solo` modes. |
 | [`clean-commits`](clean-commits/SKILL.md) | Commit hygiene: atomic commits, pre-commit verification, self-contained messages, and scanning for auto-link (`@word`) hazards. |
+
+## smart-subagent-routing: modes and guard
+
+Switch modes at any time with the slash command (requires `python3`):
+
+```
+/routing solo   # never delegate — e.g. when evaluating a model on its own
+/routing ask    # every subagent call needs your approval
+/routing auto   # delegate when it fits (default)
+/routing off    # disable the routing rules
+/routing        # show the current mode
+```
+
+The mode applies to the current session only, survives resume and compaction, and is enforced by the hook, not just by instructions. To choose a default for new sessions, set the `SUBAGENT_ROUTING` env var (e.g. `SUBAGENT_ROUTING=solo claude`). `/clear` starts a new session, so it falls back to that default.
+
+Whenever `ANTHROPIC_BASE_URL` points at a gateway, the PreToolUse hook denies any Agent call whose prompt does not start with the routing tag (default `<CCR-SUBAGENT-MODEL>`, override with `SUBAGENT_ROUTING_TAG`). Untagged subagents inherit the parent or agent-type model, which is how work silently lands on a Claude subscription.
+
+The hooks only cover subagents. Claude Code also makes background "small fast model" calls (titles, WebFetch summaries, compaction), which use the Haiku slot. Route those in the gateway too (for Claude Code Router, the `Router.background` rule), or set `ANTHROPIC_DEFAULT_HAIKU_MODEL`, so they don't reach Claude either. To let a non-Claude session delegate to its own model, add that model to the gateway's subagent model list.
 
 ## Adding a new skill
 

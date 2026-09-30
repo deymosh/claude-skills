@@ -9,7 +9,7 @@
     {
       "name": "smart-subagent-routing",
       "source": "./smart-subagent-routing",
-      "description": "Before implementing anything non-trivial, delegates execution to the best-fit available subagent model and reviews the result, falling back to doing it directly if none fits or it fails"
+      "description": "Routes non-trivial execution to cheaper subagent models and reviews the result; hooks block untagged (quota-leaking) subagents and add auto/ask/solo modes."
     },
     {
       "name": "clean-commits",

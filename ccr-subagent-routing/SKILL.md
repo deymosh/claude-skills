@@ -10,7 +10,7 @@ description: Route non-trivial work (code edits, multi-step tasks, bulk reading/
 The hook states it in context (`subagent-routing mode: …`); the user changes it with `/routing <mode>`. The latest statement wins. This skill applies in every mode except off, whatever the permission mode (default, plan, accept edits, bypass).
 
 - **auto** — delegate whenever it fits (below).
-- **ask** — before each delegation, name the task and the readable model (`Provider/model`, not the client ID) in one line and wait for approval.
+- **ask** — delegate as in auto. The hook asks the user to approve each subagent call and names its model, so just make the call; don't ask in chat first. A denied call means the user declined: do that work yourself.
 - **solo** — subagents only on this session's own provider/model; if it isn't in the Agent tool's list, do everything yourself.
 - **off** — no rules.
 

@@ -155,7 +155,7 @@ def session_start(mode, event):
         sys.exit(0)
     notes = {
         "auto": "Delegate whenever it fits.",
-        "ask": "Get the user's approval before each subagent call.",
+        "ask": "Delegate as in auto; the hook asks the user before each subagent runs, so don't ask in chat first.",
         "solo": "Subagents only on this session's own model; if it isn't listed, do all work yourself.",
     }
     context = (
@@ -173,12 +173,14 @@ def pre_tool_use(mode, event):
     target = subagent_model(event, prompt)
     shown = f"Subagent model: {target}"
 
+    # A denial goes back to the model; an ask's reason is the whole prompt the
+    # user sees, so neither repeats the model in a separate message.
     def decide(decision, reason):
         emit({
             "hookEventName": "PreToolUse",
             "permissionDecision": decision,
             "permissionDecisionReason": reason,
-        }, shown if decision != "deny" else None)
+        })
 
     if mode == "off":
         emit(message=shown)
@@ -200,7 +202,7 @@ def pre_tool_use(mode, event):
                 f"otherwise do the work yourself."
             ))
     if mode == "ask":
-        decide("ask", f"subagent-routing ask mode: run this subagent on {target}?")
+        decide("ask", f"Run this subagent on {target}?")
     emit(message=shown)
 
 

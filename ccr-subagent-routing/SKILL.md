@@ -16,7 +16,8 @@ The hook states it in context (`subagent-routing mode: …`); the user changes i
 
 ## Every Agent call
 
-- First line of `prompt`: the `<CCR-SUBAGENT-MODEL>…</CCR-SUBAGENT-MODEL>` tag exactly as the Agent tool description specifies. Set `model` to the same ID only if it accepts arbitrary strings.
+- First line of `prompt`: the `<CCR-SUBAGENT-MODEL>…</CCR-SUBAGENT-MODEL>` tag exactly as the Agent tool description specifies. The tag alone routes the call.
+- Leave `model` unset: it usually accepts only built-in aliases, and a CCR ID there fails validation before the agent runs.
 - Choose only models listed there, by description; pick the cheapest that fits. No match → do it yourself.
 - Don't use built-in aliases (`sonnet`, `haiku`, …) unless the user asks.
 
@@ -31,6 +32,7 @@ The hook states it in context (`subagent-routing mode: …`); the user changes i
 - Self-contained brief: approach, files, constraints, definition of done. Ask for a short report (e.g. ≤150 words).
 - Never read a subagent's transcript file.
 - Verify the actual result (diff, files, tests), not the report. Fix small issues yourself.
+- A reader's claim it inferred rather than traced ("X runs on every update") can be wrong: check it in the code before acting on it.
 
 ## Failure
 

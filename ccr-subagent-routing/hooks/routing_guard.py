@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Deterministic guard for subagent routing.
+"""Deterministic guard for subagent routing through Claude Code Router (CCR).
 
 SessionStart: injects the active routing mode into context, so the policy
-applies even if the smart-subagent-routing skill never gets loaded.
+applies even if the ccr-subagent-routing skill never gets loaded.
 PreToolUse (Agent): enforces the mode and blocks untagged subagents behind a
 gateway, which would otherwise silently run on the parent/default model
 (often the Claude subscription). In solo mode, only subagents routed to the
@@ -26,7 +26,7 @@ from pathlib import Path
 
 MODES = ("auto", "ask", "solo", "off")
 TAG = os.environ.get("SUBAGENT_ROUTING_TAG", "<CCR-SUBAGENT-MODEL>")
-TAG_TARGET = re.compile(re.escape(TAG) + r"\s*([^<\s]+)")
+TAG_TARGET = re.compile(re.escape(TAG) + r"([^<\n]+)")
 CCR_CLIENT_ID = re.compile(r"claude-ccr-h([0-9a-fA-F]+)")
 CONFIG_DIR = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
 STATE_DIR = CONFIG_DIR / "subagent-routing"
@@ -84,7 +84,8 @@ def behind_gateway():
 def canonical_model(model):
     """Reduce a model reference to a comparable 'Provider/model' form.
 
-    CCR client IDs hex-encode the target (anthropic/claude-ccr-h<hex>);
+    Accepts CCR client IDs, which hex-encode the target
+    (anthropic/claude-ccr-h<hex>), and CCR's plain 'provider,model' form;
     context-window suffixes like [1m] are dropped.
     """
     model = (model or "").strip()
@@ -94,6 +95,8 @@ def canonical_model(model):
             model = bytes.fromhex(match.group(1)).decode()
         except ValueError:
             pass
+    elif "/" not in model:
+        model = model.replace(",", "/", 1)
     return re.sub(r"\[[^\]]*\]$", "", model).strip().lower()
 
 
@@ -128,16 +131,13 @@ def session_start(mode, event):
     if mode == "off":
         sys.exit(0)
     notes = {
-        "auto": "Before implementing or spawning a subagent, follow the smart-subagent-routing skill.",
-        "ask": "Only delegate to a subagent after the user approves; say which model and why in one line.",
-        "solo": (
-            "The user is evaluating this session's model alone: subagents may only run on this same model. "
-            "If it is not in the Agent tool's model list, do all work yourself."
-        ),
+        "auto": "Follow the ccr-subagent-routing skill before implementing or calling Agent.",
+        "ask": "Get the user's approval before each subagent call.",
+        "solo": "Subagents only on this session's own model; if it isn't listed, do all work yourself.",
     }
     context = f"subagent-routing mode: {mode}. {notes[mode]}"
     if behind_gateway():
-        context += f" Every Agent prompt must start with the {TAG} routing tag; untagged calls are denied."
+        context += f" Agent prompts must start with the {TAG} tag."
     emit({"hookEventName": "SessionStart", "additionalContext": context})
 
 
@@ -155,9 +155,8 @@ def pre_tool_use(mode, event):
         sys.exit(0)
     if behind_gateway() and not prompt.startswith(TAG):
         decide("deny", (
-            f"Untagged subagent behind the gateway: it would run on the parent/default model, "
-            f"possibly the Claude subscription. Re-issue with the {TAG} tag from the Agent tool "
-            f"description as the prompt's first line, or do the work yourself."
+            f"Untagged subagent: start the prompt with the {TAG} tag from the Agent tool "
+            f"description, or do the work yourself."
         ))
     if mode == "solo":
         own = session_model(event)
@@ -170,12 +169,11 @@ def pre_tool_use(mode, event):
             allowed = target in ("", "inherit")
         if not allowed:
             decide("deny", (
-                f"subagent-routing solo mode: subagents may only run on this session's own model "
-                f"({own or 'unknown'}), not '{target or 'default'}'. Route to that model if the Agent "
-                f"tool lists it; otherwise do this work yourself."
+                f"Solo mode: subagents only on {own or 'this session model'}, if listed; "
+                f"otherwise do the work yourself."
             ))
     if mode == "ask":
-        decide("ask", "subagent-routing ask mode: approve delegating this task to a subagent?")
+        decide("ask", "subagent-routing ask mode: approve this subagent call?")
     sys.exit(0)
 
 

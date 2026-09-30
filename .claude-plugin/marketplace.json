@@ -7,9 +7,9 @@
   "description": "Personal collection of Claude Code skills",
   "plugins": [
     {
-      "name": "smart-subagent-routing",
-      "source": "./smart-subagent-routing",
-      "description": "Routes non-trivial execution to cheaper subagent models and reviews the result; hooks block untagged (quota-leaking) subagents and add auto/ask/solo modes."
+      "name": "ccr-subagent-routing",
+      "source": "./ccr-subagent-routing",
+      "description": "Claude Code Router (CCR): routes non-trivial execution to cheaper subagent models and reviews the result; hooks block untagged (quota-leaking) subagents and add auto/ask/solo modes."
     },
     {
       "name": "clean-commits",

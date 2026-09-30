@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "ccr-subagent-routing",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Claude Code Router (CCR): routes non-trivial execution to cheaper subagent models and reviews the result; hooks block untagged (quota-leaking) subagents and add auto/ask/solo modes.",
   "author": {
     "name": "deymosh",

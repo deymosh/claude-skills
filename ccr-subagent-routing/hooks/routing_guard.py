@@ -81,8 +81,8 @@ def behind_gateway():
     return bool(url) and "anthropic.com" not in url
 
 
-def canonical_model(model):
-    """Reduce a model reference to a comparable 'Provider/model' form.
+def readable_model(model):
+    """Turn a model reference into a readable 'Provider/model' name.
 
     Accepts CCR client IDs, which hex-encode the target
     (anthropic/claude-ccr-h<hex>), and CCR's plain 'provider,model' form;
@@ -97,7 +97,12 @@ def canonical_model(model):
             pass
     elif "/" not in model:
         model = model.replace(",", "/", 1)
-    return re.sub(r"\[[^\]]*\]$", "", model).strip().lower()
+    return re.sub(r"\[[^\]]*\]$", "", model).strip()
+
+
+def canonical_model(model):
+    """Reduce a model reference to a comparable 'Provider/model' form."""
+    return readable_model(model).lower()
 
 
 def session_model(event):
@@ -120,9 +125,27 @@ def session_model(event):
     return read_state(event.get("session_id", ""), ".model")
 
 
-def emit(output):
-    json.dump({"hookSpecificOutput": output}, sys.stdout)
+def emit(output=None, message=None):
+    payload = {"hookSpecificOutput": output} if output else {}
+    if message:
+        payload["systemMessage"] = message
+    json.dump(payload, sys.stdout)
     sys.exit(0)
+
+
+def subagent_model(event, prompt):
+    """Readable name of the model the subagent will run on."""
+    match = TAG_TARGET.match(prompt)
+    if match:
+        return readable_model(match.group(1))
+    requested = (event.get("tool_input") or {}).get("model") or ""
+    if requested and requested != "inherit":
+        return readable_model(requested)
+    override = os.environ.get("CLAUDE_CODE_SUBAGENT_MODEL", "")
+    if override:
+        return readable_model(override)
+    own = readable_model(session_model(event))
+    return f"{own} (inherited)" if own else "the session model (inherited)"
 
 
 def session_start(mode, event):
@@ -131,28 +154,34 @@ def session_start(mode, event):
     if mode == "off":
         sys.exit(0)
     notes = {
-        "auto": "Follow the ccr-subagent-routing skill before implementing or calling Agent.",
+        "auto": "Delegate whenever it fits.",
         "ask": "Get the user's approval before each subagent call.",
         "solo": "Subagents only on this session's own model; if it isn't listed, do all work yourself.",
     }
-    context = f"subagent-routing mode: {mode}. {notes[mode]}"
+    context = (
+        f"subagent-routing mode: {mode}. {notes[mode]} "
+        f"Follow the ccr-subagent-routing skill before implementing or calling Agent."
+    )
     if behind_gateway():
         context += f" Agent prompts must start with the {TAG} tag."
     emit({"hookEventName": "SessionStart", "additionalContext": context})
 
 
 def pre_tool_use(mode, event):
+    tool_input = event.get("tool_input") or {}
+    prompt = tool_input.get("prompt", "").lstrip()
+    target = subagent_model(event, prompt)
+    shown = f"Subagent model: {target}"
+
     def decide(decision, reason):
         emit({
             "hookEventName": "PreToolUse",
             "permissionDecision": decision,
             "permissionDecisionReason": reason,
-        })
+        }, shown if decision != "deny" else None)
 
-    tool_input = event.get("tool_input") or {}
-    prompt = tool_input.get("prompt", "").lstrip()
     if mode == "off":
-        sys.exit(0)
+        emit(message=shown)
     if behind_gateway() and not prompt.startswith(TAG):
         decide("deny", (
             f"Untagged subagent: start the prompt with the {TAG} tag from the Agent tool "
@@ -162,19 +191,17 @@ def pre_tool_use(mode, event):
         own = session_model(event)
         if behind_gateway():
             match = TAG_TARGET.match(prompt)
-            target = match.group(1) if match else ""
-            allowed = bool(own) and canonical_model(target) == canonical_model(own)
+            allowed = bool(own) and bool(match) and canonical_model(match.group(1)) == canonical_model(own)
         else:
-            target = tool_input.get("model") or ""
-            allowed = target in ("", "inherit")
+            allowed = tool_input.get("model") in (None, "", "inherit")
         if not allowed:
             decide("deny", (
-                f"Solo mode: subagents only on {own or 'this session model'}, if listed; "
+                f"Solo mode: subagents only on {readable_model(own) or 'this session model'}, not {target}; "
                 f"otherwise do the work yourself."
             ))
     if mode == "ask":
-        decide("ask", "subagent-routing ask mode: approve this subagent call?")
-    sys.exit(0)
+        decide("ask", f"subagent-routing ask mode: run this subagent on {target}?")
+    emit(message=shown)
 
 
 def main():

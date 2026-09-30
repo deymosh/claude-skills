@@ -7,10 +7,10 @@ description: Route non-trivial work (code edits, multi-step tasks, bulk reading/
 
 ## Mode
 
-The hook states it in context (`subagent-routing mode: …`); the user changes it with `/routing <mode>`. The latest statement wins.
+The hook states it in context (`subagent-routing mode: …`); the user changes it with `/routing <mode>`. The latest statement wins. This skill applies in every mode except off, whatever the permission mode (default, plan, accept edits, bypass).
 
 - **auto** — delegate whenever it fits (below).
-- **ask** — before each delegation, name the task and model in one line and wait for approval.
+- **ask** — before each delegation, name the task and the readable model (`Provider/model`, not the client ID) in one line and wait for approval.
 - **solo** — subagents only on this session's own provider/model; if it isn't in the Agent tool's list, do everything yourself.
 - **off** — no rules.
 
@@ -34,4 +34,4 @@ The hook states it in context (`subagent-routing mode: …`); the user changes i
 
 ## Failure
 
-Rate limit, API error, empty or garbled output → retry once on another fitting listed model → else do it yourself. Never retry without the tag. Tell the user in one sentence which model did the work.
+Rate limit, API error, empty or garbled output → retry once on another fitting listed model → else do it yourself. Never retry without the tag. Tell the user in one sentence which model did the work, by its readable `Provider/model` name.

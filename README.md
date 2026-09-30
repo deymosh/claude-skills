@@ -35,6 +35,8 @@ The mode applies to the current session only, survives resume and compaction, an
 
 In `solo`, the hook reads the session's current model from its transcript (so it follows `/model` switches) and allows a subagent only if its routing tag points to that exact provider and model; CCR client IDs are decoded for the comparison. The session's model must therefore be in the gateway's subagent list for solo sessions to delegate at all. Without a gateway, solo allows only subagents that inherit the session model; built-in agent types that pin their own model are not detected.
 
+Before every subagent call, in every mode, the hook shows the readable name of the model it will run on (e.g. `Subagent model: OpenCode Go/glm-5.3-flash`, decoded from CCR's hex client ID); `ask` mode names it in the approval prompt too.
+
 Whenever `ANTHROPIC_BASE_URL` points at a gateway, the PreToolUse hook denies any Agent call whose prompt does not start with CCR's `<CCR-SUBAGENT-MODEL>` tag (override with `SUBAGENT_ROUTING_TAG`). Untagged subagents inherit the parent or agent-type model, which is how work silently lands on a Claude subscription. The tag convention is CCR-specific: behind another gateway (LiteLLM, OpenRouter, …) the hook would deny every subagent, so run with `SUBAGENT_ROUTING=off` there.
 
 As a backstop outside the hook, set Claude Code's `CLAUDE_CODE_SUBAGENT_MODEL` to a cheap CCR model. Claude Code then requests that model for every subagent, including built-in types like Explore, while CCR's tag still decides the route of tagged calls.
